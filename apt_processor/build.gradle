@@ -1,0 +1,21 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+//    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(path: ':apt-annotation')
+    api 'com.google.auto.service:auto-service:1.0-rc4'
+    // AS-3.4.1+  gradle5.1.1-all+ 需要添加下面的
+    annotationProcessor 'com.google.auto.service:auto-service:1.0-rc4'
+    api 'com.squareup:javapoet:1.10.0'
+}
+//中文乱码问题（错误：编码GBK不可映射字符）
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}

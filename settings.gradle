@@ -1,3 +1,5 @@
 rootProject.name = "AndLogin"
 include ':app'
+include ':apt_processor'
+include ':apt-annotation'
 include ':lib'
