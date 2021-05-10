@@ -1,4 +1,4 @@
-package per.wsj.lib.hook;
+package me.wsj.login.hook;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -56,8 +56,8 @@ public class HookUtil {
             // 3，对IActivityManager进行动态代理
             Object proxyInstance = Proxy.newProxyInstance(context.getClassLoader(), new Class[]{iActivityManagerClass},
                     (proxy, method, args) -> {
-                        /*if (method.getName().equals("startActivity")) {
-                            if (!SpUtil.isLogin(context)) {
+                        if (method.getName().equals("startActivity")) {
+                            /*if (!SpUtil.isLogin(context)) {
                                 int pos = 0;
                                 for (int i = 0; i < args.length; i++) {
                                     if (args[i] instanceof Intent) {
@@ -76,8 +76,8 @@ public class HookUtil {
                                         args[pos] = intent;
                                     }
                                 }
-                            }
-                        }*/
+                            }*/
+                        }
                         return method.invoke(mInstance, args);
                     });
             // 4，把代理赋值给IActivityManager类型的mInstance对象
@@ -92,7 +92,7 @@ public class HookUtil {
         if (needLoginNames.size() == 0) {
             // 反射调用apt生成的方法
             try {
-                Class<?> NeedLoginClazz = Class.forName("per.wsj.gitstar.apt.NeedLogin");
+                Class<?> NeedLoginClazz = Class.forName("me.wsj.login.apt.NeedLogin");
                 Method getNeedLoginListMethod = NeedLoginClazz.getDeclaredMethod("getNeedLoginList");
                 getNeedLoginListMethod.setAccessible(true);
                 Object obj = NeedLoginClazz.newInstance();
@@ -107,7 +107,7 @@ public class HookUtil {
 
     public static void test() {
         try {
-            Class<?> NeedLoginClazz = Class.forName("per.wsj.login.apt.NeedLogin");
+            Class<?> NeedLoginClazz = Class.forName("me.wsj.login.apt.NeedLogin");
             Method getNeedLoginListMethod = NeedLoginClazz.getDeclaredMethod("getNeedLoginList");
             getNeedLoginListMethod.setAccessible(true);
             Object obj = NeedLoginClazz.newInstance();

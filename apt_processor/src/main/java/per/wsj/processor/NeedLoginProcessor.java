@@ -28,27 +28,33 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 
+import per.wsj.annotation.LoginActivity;
 import per.wsj.annotation.NeedLogin;
 
 @AutoService(Processor.class)
 @SupportedOptions("room.schemaLocation")
 public class NeedLoginProcessor extends AbstractProcessor {
 
+    private String pkName = "me.wsj.login.apt";
+
     private Messager mMessager;
 
-    private List<String> tempList;
+    private List<String> activityList;
+
+    private String loginActivity;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
         mMessager = processingEnv.getMessager();
-        tempList = new ArrayList<>();
+        activityList = new ArrayList<>();
     }
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         HashSet<String> supportTypes = new LinkedHashSet<>();
         supportTypes.add(NeedLogin.class.getCanonicalName());
+        supportTypes.add(LoginActivity.class.getCanonicalName());
         return supportTypes;
     }
 
@@ -71,10 +77,12 @@ public class NeedLoginProcessor extends AbstractProcessor {
                 .addModifiers(Modifier.PUBLIC)
                 // 3，添加获取类的list的方法
                 .addMethod(createNeedLoginFun())
+                // 创建登录activity相关代码
+                .addMethod(createLoginActivityFun())
                 .build();
 
         // 4，设置包路径：per.wsj.gitstar.apt
-        JavaFile javaFile = JavaFile.builder("per.wsj.login.apt", typeSpec).build();
+        JavaFile javaFile = JavaFile.builder(pkName, typeSpec).build();
         try {
             // 5，生成文件
             javaFile.writeTo(processingEnv.getFiler());
@@ -92,7 +100,7 @@ public class NeedLoginProcessor extends AbstractProcessor {
      * @param roundEnv
      */
     private void parseAnno(RoundEnvironment roundEnv) {
-        tempList.clear();
+        activityList.clear();
         // 得到所有注解为NeedLogin的元素
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(NeedLogin.class);
         for (Element element : elements) {
@@ -106,7 +114,22 @@ public class NeedLoginProcessor extends AbstractProcessor {
             TypeElement classElement = (TypeElement) element;
             // 包名+类型:per.wsj.gitstar.ui.activity.EventActivity
             String fullClassName = classElement.getQualifiedName().toString();
-            tempList.add(fullClassName);
+            activityList.add(fullClassName);
+        }
+
+        // 查找登录的Activity
+        Set<? extends Element> loginActivityElements = roundEnv.getElementsAnnotatedWith(LoginActivity.class);
+        for (Element loginActivityElement : loginActivityElements) {
+            if (loginActivityElement.getKind() != ElementKind.CLASS) {
+                mMessager.printMessage(Diagnostic.Kind.WARNING,
+                        loginActivityElement.getSimpleName().toString() + "不是类，不予处理");
+                continue;
+            }
+            // 放心大胆地强转成TypeElement
+            TypeElement classElement = (TypeElement) loginActivityElement;
+            // 包名+类型
+            String fullClassName = classElement.getQualifiedName().toString();
+            loginActivity = fullClassName;
         }
     }
 
@@ -124,12 +147,25 @@ public class NeedLoginProcessor extends AbstractProcessor {
                 .returns(listOfView);
         // List<String> result = new ArrayList<>();
         methodBuilder.addStatement("$T result = new $T<>()", listOfView, arrayList);
-        for (String s : tempList) {
+        for (String s : activityList) {
             // result.add("per.wsj.gitstar.ui.activity.EventActivity");
             methodBuilder.addStatement("result.add(\"" + s + "\")");
         }
         // return result;
         methodBuilder.addStatement("return result");
+        return methodBuilder.build();
+    }
+
+    /**
+     * @return
+     */
+    private MethodSpec createLoginActivityFun() {
+        ClassName stringName = ClassName.get(String.class);
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getLoginActivity")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(stringName);
+
+        methodBuilder.addStatement("return \"" + loginActivity + "\"");
         return methodBuilder.build();
     }
 }

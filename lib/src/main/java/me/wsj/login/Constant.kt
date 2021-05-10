@@ -1,4 +1,4 @@
-package per.wsj.lib
+package me.wsj.login
 
 object Constant {
     // hook ams的参数名

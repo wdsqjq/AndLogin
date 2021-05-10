@@ -3,22 +3,32 @@
     package="me.wsj.andlogin">
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndLogin">
-        <activity android:name=".MainActivity"></activity>
         <activity
-            android:name=".ui.login.LoginActivity"
-            android:label="@string/app_name">
+            android:name=".activity.TargetActivity3"
+            android:label="Activity3" />
+        <activity
+            android:name=".activity.TargetActivity2"
+            android:label="Activity2" />
+        <activity
+            android:name=".activity.TargetActivity1"
+            android:label="Activity1" />
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activity.LoginActivity"
+            android:label="Login" />
     </application>
 
 </manifest>
