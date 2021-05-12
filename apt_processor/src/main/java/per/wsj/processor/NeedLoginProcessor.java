@@ -24,10 +24,12 @@ import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 
+import per.wsj.annotation.JudgeLogin;
 import per.wsj.annotation.LoginActivity;
 import per.wsj.annotation.NeedLogin;
 
@@ -43,6 +45,8 @@ public class NeedLoginProcessor extends AbstractProcessor {
 
     private String loginActivity;
 
+    private String judgeLoginMethod;
+
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
@@ -55,6 +59,7 @@ public class NeedLoginProcessor extends AbstractProcessor {
         HashSet<String> supportTypes = new LinkedHashSet<>();
         supportTypes.add(NeedLogin.class.getCanonicalName());
         supportTypes.add(LoginActivity.class.getCanonicalName());
+        supportTypes.add(JudgeLogin.class.getCanonicalName());
         return supportTypes;
     }
 
@@ -68,17 +73,18 @@ public class NeedLoginProcessor extends AbstractProcessor {
         if (set.isEmpty()) {
             return false;
         }
-        mMessager.printMessage(Diagnostic.Kind.WARNING, "processing...");
+        mMessager.printMessage(Diagnostic.Kind.WARNING, "\nprocessing...\n");
         // 1，获取所有添加了注解的Activity，保存到List中
         parseAnno(roundEnvironment);
 
         // 2，创建名为NeedLogin的类
-        TypeSpec typeSpec = TypeSpec.classBuilder("NeedLogin")
+        TypeSpec typeSpec = TypeSpec.classBuilder("AndLoginUtils")
                 .addModifiers(Modifier.PUBLIC)
                 // 3，添加获取类的list的方法
                 .addMethod(createNeedLoginFun())
                 // 创建登录activity相关代码
                 .addMethod(createLoginActivityFun())
+                .addMethod(createJudgeLoginFun())
                 .build();
 
         // 4，设置包路径：per.wsj.gitstar.apt
@@ -90,7 +96,7 @@ public class NeedLoginProcessor extends AbstractProcessor {
             e.printStackTrace();
         }
 
-        mMessager.printMessage(Diagnostic.Kind.WARNING, "process finish ...");
+        mMessager.printMessage(Diagnostic.Kind.WARNING, "\nprocess finish ...\n");
         return true;// 返回false则只会执行一次
     }
 
@@ -131,6 +137,23 @@ public class NeedLoginProcessor extends AbstractProcessor {
             String fullClassName = classElement.getQualifiedName().toString();
             loginActivity = fullClassName;
         }
+
+        // 查找判断是否登录的方法
+        Set<? extends Element> judgeLoginElements = roundEnv.getElementsAnnotatedWith(JudgeLogin.class);
+        for (Element element : judgeLoginElements) {
+            if (element instanceof ExecutableElement) {
+                mMessager.printMessage(Diagnostic.Kind.WARNING,
+                        "\n判断登录的方法:" + element.getSimpleName());
+                ExecutableElement method = (ExecutableElement) element;
+                TypeElement classElement = (TypeElement) method.getEnclosingElement();
+                mMessager.printMessage(Diagnostic.Kind.WARNING, "\n登录方法所在类：" + classElement.getQualifiedName().toString());
+                String classPath = classElement.getQualifiedName().toString();
+                if (classPath.endsWith("Companion")) {
+                    continue;
+                }
+                judgeLoginMethod = classPath + "#" + element.getSimpleName();
+            }
+        }
     }
 
     /**
@@ -144,6 +167,7 @@ public class NeedLoginProcessor extends AbstractProcessor {
         // 创建名为getViewAnno的方法
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getNeedLoginList")
                 .addModifiers(Modifier.PUBLIC)
+                .addModifiers(Modifier.STATIC)
                 .returns(listOfView);
         // List<String> result = new ArrayList<>();
         methodBuilder.addStatement("$T result = new $T<>()", listOfView, arrayList);
@@ -157,15 +181,34 @@ public class NeedLoginProcessor extends AbstractProcessor {
     }
 
     /**
+     * 创建登录的activity
+     *
      * @return
      */
     private MethodSpec createLoginActivityFun() {
         ClassName stringName = ClassName.get(String.class);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getLoginActivity")
                 .addModifiers(Modifier.PUBLIC)
+                .addModifiers(Modifier.STATIC)
                 .returns(stringName);
 
         methodBuilder.addStatement("return \"" + loginActivity + "\"");
+        return methodBuilder.build();
+    }
+
+    /**
+     * 判断是否登录的方法
+     *
+     * @return
+     */
+    private MethodSpec createJudgeLoginFun() {
+        ClassName stringName = ClassName.get(String.class);
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getJudgeLoginMethod")
+                .addModifiers(Modifier.PUBLIC)
+                .addModifiers(Modifier.STATIC)
+                .returns(stringName);
+
+        methodBuilder.addStatement("return \"" + judgeLoginMethod + "\"");
         return methodBuilder.build();
     }
 }

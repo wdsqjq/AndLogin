@@ -2,9 +2,11 @@ package me.wsj.andlogin.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import me.wsj.andlogin.databinding.ActivityMainBinding
 import me.wsj.andlogin.utils.SpUtil
+import me.wsj.login.hook.AndLogin
 
 class MainActivity : AppCompatActivity() {
 

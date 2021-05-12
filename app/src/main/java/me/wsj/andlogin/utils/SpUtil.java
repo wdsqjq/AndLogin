@@ -32,6 +32,6 @@ public class SpUtil {
     }
 
     public static void logout() {
-        sharedPreferences.edit().clear();
+        sharedPreferences.edit().clear().commit();
     }
 }

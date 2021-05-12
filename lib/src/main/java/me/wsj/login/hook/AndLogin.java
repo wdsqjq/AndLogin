@@ -6,6 +6,8 @@ import me.wsj.login.utils.LogUtil;
 
 public class AndLogin {
 
+    public static final String TARGET_ACTIVITY_NAME = "targetActivity";
+
     private static AndLogin instance;
 
     private AndLogin() {
@@ -21,5 +23,9 @@ public class AndLogin {
     public void init(Context context) {
 //        LogUtil.d("init");
         HookUtil.HookAms(context);
+    }
+
+    public void handleIntent(){
+
     }
 }

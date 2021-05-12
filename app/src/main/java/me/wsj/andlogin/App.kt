@@ -12,12 +12,6 @@ class App : Application() {
         lateinit var mContext: Context
     }
 
-    // 该方法用于返回是否登录，可以放置在任何位置
-    @JudgeLogin
-    fun checkLogin(): Boolean {
-        return SpUtil.isLogin()
-    }
-
     override fun onCreate() {
         super.onCreate()
 

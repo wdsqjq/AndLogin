@@ -12,7 +12,13 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.wsj.login.Constant;
+
 public class HookUtil {
+
+    private static final String UTILS_PATH = "me.wsj.login.apt.AndLoginUtils";
+
+    private static Class<?> loginActivityClazz;
 
     private static List<String> needLoginNames = new ArrayList<>();
 
@@ -27,6 +33,7 @@ public class HookUtil {
             Class<?> iActivityManagerClass;
             // 1，获取Instrumentation中调用startActivity(,intent,)方法的对象
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                Thread.sleep(500);
                 // 10.0是ActivityTaskManager中的IActivityTaskManagerSingleton
                 Class<?> activityTaskManagerClass = Class.forName("android.app.ActivityTaskManager");
                 singletonField = activityTaskManagerClass.getDeclaredField("IActivityTaskManagerSingleton");
@@ -57,7 +64,8 @@ public class HookUtil {
             Object proxyInstance = Proxy.newProxyInstance(context.getClassLoader(), new Class[]{iActivityManagerClass},
                     (proxy, method, args) -> {
                         if (method.getName().equals("startActivity")) {
-                            /*if (!SpUtil.isLogin(context)) {
+//                            if (!SpUtil.isLogin(context)) {
+                            if (!isLogin()) {
                                 int pos = 0;
                                 for (int i = 0; i < args.length; i++) {
                                     if (args[i] instanceof Intent) {
@@ -67,16 +75,17 @@ public class HookUtil {
                                 }
                                 Intent originIntent = (Intent) args[pos];
                                 if (originIntent.getComponent() != null) {
-                                    // 解决：请求权限启动PermissionActivity时异常
                                     String activityName = originIntent.getComponent().getClassName();
 
-                                    if (needLogin(activityName)) {
-                                        Intent intent = new Intent(context, LoginActivity.class);
-                                        intent.putExtra(Constant.HOOK_AMS_EXTRA_NAME, originIntent);
-                                        args[pos] = intent;
+                                    if (isNeedLogin(activityName)) {
+                                        if (getLoginActivity() != null) {
+                                            Intent intent = new Intent(context, getLoginActivity());
+                                            intent.putExtra(Constant.HOOK_AMS_EXTRA_NAME, originIntent);
+                                            args[pos] = intent;
+                                        }
                                     }
                                 }
-                            }*/
+                            }
                         }
                         return method.invoke(mInstance, args);
                     });
@@ -88,15 +97,21 @@ public class HookUtil {
         }
     }
 
-    private static boolean needLogin(String activityName) {
+    /**
+     * 该activity是否需要登录
+     *
+     * @param activityName
+     * @return
+     */
+    private static boolean isNeedLogin(String activityName) {
         if (needLoginNames.size() == 0) {
             // 反射调用apt生成的方法
             try {
-                Class<?> NeedLoginClazz = Class.forName("me.wsj.login.apt.NeedLogin");
+                Class<?> NeedLoginClazz = Class.forName(UTILS_PATH);
                 Method getNeedLoginListMethod = NeedLoginClazz.getDeclaredMethod("getNeedLoginList");
                 getNeedLoginListMethod.setAccessible(true);
-                Object obj = NeedLoginClazz.newInstance();
-                needLoginNames.addAll((List<String>) getNeedLoginListMethod.invoke(obj));
+//                Object obj = NeedLoginClazz.newInstance();
+                needLoginNames.addAll((List<String>) getNeedLoginListMethod.invoke(null));
                 Log.d("HootUtil", "size" + needLoginNames.size());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -105,16 +120,50 @@ public class HookUtil {
         return needLoginNames.contains(activityName);
     }
 
-    public static void test() {
+    /**
+     * 获取登录activity
+     *
+     * @return
+     */
+    private static Class<?> getLoginActivity() {
+        if (loginActivityClazz == null) {
+            try {
+                Class<?> NeedLoginClazz = Class.forName(UTILS_PATH);
+                Method getLoginActivityMethod = NeedLoginClazz.getDeclaredMethod("getLoginActivity");
+                getLoginActivityMethod.setAccessible(true);
+                String loginActivity = (String) getLoginActivityMethod.invoke(null);
+                loginActivityClazz = Class.forName(loginActivity);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return loginActivityClazz;
+    }
+
+    /**
+     * 是否已经登录
+     *
+     * @return
+     */
+    private static boolean isLogin() {
         try {
-            Class<?> NeedLoginClazz = Class.forName("me.wsj.login.apt.NeedLogin");
-            Method getNeedLoginListMethod = NeedLoginClazz.getDeclaredMethod("getNeedLoginList");
-            getNeedLoginListMethod.setAccessible(true);
-            Object obj = NeedLoginClazz.newInstance();
-            needLoginNames.addAll((List<String>) getNeedLoginListMethod.invoke(obj));
-            Log.d("HootUtil", "size: " + needLoginNames.size());
+            Class<?> NeedLoginClazz = Class.forName(UTILS_PATH);
+            Method getJudgeLoginMethod = NeedLoginClazz.getDeclaredMethod("getJudgeLoginMethod");
+            getJudgeLoginMethod.setAccessible(true);
+            String methodPath = (String) getJudgeLoginMethod.invoke(null);
+            String[] split = methodPath.split("#");
+            if (split.length == 2) {
+                String methodPkg = split[0];
+                String methodName = split[1];
+                Class<?> methodInClazz = Class.forName(methodPkg);
+                Method methodNameMethod = methodInClazz.getDeclaredMethod(methodName);
+                methodNameMethod.setAccessible(true);
+                boolean result = (boolean) methodNameMethod.invoke(null);
+                return result;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
     }
 }
