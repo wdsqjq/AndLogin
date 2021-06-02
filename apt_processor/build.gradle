@@ -7,7 +7,7 @@ group='com.github.HappyAndroid946'
 
 dependencies {
 //    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(path: ':apt-annotation')
+    implementation project(path: ':apt_annotation')
     api 'com.google.auto.service:auto-service:1.0-rc4'
     // AS-3.4.1+  gradle5.1.1-all+ 需要添加下面的
     annotationProcessor 'com.google.auto.service:auto-service:1.0-rc4'

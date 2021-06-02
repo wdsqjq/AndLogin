@@ -52,8 +52,6 @@ dependencies {
 
     implementation project(path: ':lib')
     kapt project(path: ':apt_processor')
-//    implementation 'com.github.HappyAndroid946.AndLogin:lib:1.0.0'
-//    kapt 'com.github.HappyAndroid946.AndLogin:apt_processor:1.0.0'
-
-//    implementation 'com.github.HappyAndroid946:AndLogin:1.0.0'
+//    implementation 'com.github.HappyAndroid946.AndLogin:lib:1.0.2'
+//    kapt 'com.github.HappyAndroid946.AndLogin:apt_processor:1.0.2'
 }
