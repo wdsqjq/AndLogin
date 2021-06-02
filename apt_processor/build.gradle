@@ -1,6 +1,9 @@
 plugins {
     id 'java-library'
+    id 'com.github.dcendents.android-maven'
 }
+
+group='com.github.HappyAndroid946'
 
 dependencies {
 //    implementation fileTree(dir: 'libs', include: ['*.jar'])
