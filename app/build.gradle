@@ -50,8 +50,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0'
 
-    implementation project(path: ':lib')
-    kapt project(path: ':apt_processor')
-//    implementation 'com.github.HappyAndroid946.AndLogin:lib:1.0.2'
-//    kapt 'com.github.HappyAndroid946.AndLogin:apt_processor:1.0.2'
+//    implementation project(path: ':lib')
+//    kapt project(path: ':apt_processor')
+    implementation 'com.github.HappyAndroid946.AndLogin:lib:1.0.3'
+    kapt 'com.github.HappyAndroid946.AndLogin:apt_processor:1.0.3'
 }
