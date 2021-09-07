@@ -14,6 +14,8 @@ class TargetActivity1 : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_target)
 
+        supportActionBar?.setDefaultDisplayHomeAsUpEnabled(true)
+
         findViewById<TextView>(R.id.tvAccount).text = "当前用户：" + SpUtil.getAccount()
     }
 }
