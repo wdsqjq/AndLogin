@@ -34,6 +34,20 @@ class MainActivity : AppCompatActivity() {
 
         binding.btn4.setOnClickListener {
             SpUtil.logout()
+            checkLogin()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkLogin()
+    }
+
+    fun checkLogin() {
+        if (SpUtil.isLogin()) {
+            binding.tvStatus.text = "已登录: " + SpUtil.getAccount()
+        } else {
+            binding.tvStatus.text = "当前未登录"
         }
     }
 }

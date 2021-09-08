@@ -165,7 +165,7 @@ public class RequireLoginProcessor extends AbstractProcessor {
         TypeName listOfView = ParameterizedTypeName.get(List.class, String.class);
 
         // 创建名为getViewAnno的方法
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getNeedLoginList")
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getRequireLoginList")
                 .addModifiers(Modifier.PUBLIC)
                 .addModifiers(Modifier.STATIC)
                 .returns(listOfView);

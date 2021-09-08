@@ -20,7 +20,7 @@ public class HookUtil {
 
     private static Class<?> loginActivityClazz;
 
-    private static List<String> needLoginNames = new ArrayList<>();
+    private static List<String> requireLoginNames = new ArrayList<>();
 
     /**
      * 不可再Application的onCreate()中直接调用，可以延迟一会，哪怕一毫秒都行，不然mInstance会为空
@@ -79,7 +79,7 @@ public class HookUtil {
                                 if (originIntent.getComponent() != null) {
                                     String activityName = originIntent.getComponent().getClassName();
 
-                                    if (isNeedLogin(activityName)) {
+                                    if (isRequireLogin(activityName)) {
                                         if (getLoginActivity() != null) {
                                             Intent intent = new Intent(context, getLoginActivity());
                                             intent.putExtra(Constant.HOOK_AMS_EXTRA_NAME, originIntent);
@@ -105,21 +105,21 @@ public class HookUtil {
      * @param activityName
      * @return
      */
-    private static boolean isNeedLogin(String activityName) {
-        if (needLoginNames.size() == 0) {
+    private static boolean isRequireLogin(String activityName) {
+        if (requireLoginNames.size() == 0) {
             // 反射调用apt生成的方法
             try {
                 Class<?> NeedLoginClazz = Class.forName(UTILS_PATH);
-                Method getNeedLoginListMethod = NeedLoginClazz.getDeclaredMethod("getNeedLoginList");
+                Method getNeedLoginListMethod = NeedLoginClazz.getDeclaredMethod("getRequireLoginList");
                 getNeedLoginListMethod.setAccessible(true);
 //                Object obj = NeedLoginClazz.newInstance();
-                needLoginNames.addAll((List<String>) getNeedLoginListMethod.invoke(null));
-                Log.d("HootUtil", "size" + needLoginNames.size());
+                requireLoginNames.addAll((List<String>) getNeedLoginListMethod.invoke(null));
+                Log.d("HootUtil", "size" + requireLoginNames.size());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return needLoginNames.contains(activityName);
+        return requireLoginNames.contains(activityName);
     }
 
     /**
