@@ -31,11 +31,11 @@ import javax.tools.Diagnostic;
 
 import per.wsj.annotation.JudgeLogin;
 import per.wsj.annotation.LoginActivity;
-import per.wsj.annotation.NeedLogin;
+import per.wsj.annotation.RequireLogin;
 
 @AutoService(Processor.class)
 @SupportedOptions("room.schemaLocation")
-public class NeedLoginProcessor extends AbstractProcessor {
+public class RequireLoginProcessor extends AbstractProcessor {
 
     private String pkName = "me.wsj.login.apt";
 
@@ -57,7 +57,7 @@ public class NeedLoginProcessor extends AbstractProcessor {
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         HashSet<String> supportTypes = new LinkedHashSet<>();
-        supportTypes.add(NeedLogin.class.getCanonicalName());
+        supportTypes.add(RequireLogin.class.getCanonicalName());
         supportTypes.add(LoginActivity.class.getCanonicalName());
         supportTypes.add(JudgeLogin.class.getCanonicalName());
         return supportTypes;
@@ -108,7 +108,7 @@ public class NeedLoginProcessor extends AbstractProcessor {
     private void parseAnno(RoundEnvironment roundEnv) {
         activityList.clear();
         // 得到所有注解为NeedLogin的元素
-        Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(NeedLogin.class);
+        Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(RequireLogin.class);
         for (Element element : elements) {
             // 检查元素是否是一个class.  注意：不能用instanceof TypeElement来判断，因为接口类型也是TypeElement.
             if (element.getKind() != ElementKind.CLASS) {

@@ -33,8 +33,8 @@ public class HookUtil {
             Class<?> iActivityManagerClass;
             // 1，获取Instrumentation中调用startActivity(,intent,)方法的对象
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                Thread.sleep(500);
-                // 10.0是ActivityTaskManager中的IActivityTaskManagerSingleton
+//                Thread.sleep(500);
+                // 10.0以上是ActivityTaskManager中的IActivityTaskManagerSingleton
                 Class<?> activityTaskManagerClass = Class.forName("android.app.ActivityTaskManager");
                 singletonField = activityTaskManagerClass.getDeclaredField("IActivityTaskManagerSingleton");
                 iActivityManagerClass = Class.forName("android.app.IActivityTaskManager");
@@ -56,7 +56,9 @@ public class HookUtil {
             Class<?> singletonClass = Class.forName("android.util.Singleton");
             Field mInstanceField = singletonClass.getDeclaredField("mInstance");
             mInstanceField.setAccessible(true);
-            Object mInstance = mInstanceField.get(singleton);
+            /* Object mInstance = mInstanceField.get(singleton); */
+            Method getMethod = singletonClass.getDeclaredMethod("get");
+            Object mInstance = getMethod.invoke(singleton);
             if (mInstance == null) {
                 return;
             }

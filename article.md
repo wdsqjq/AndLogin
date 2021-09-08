@@ -1,5 +1,13 @@
 # AndLogin
 
+1，何时判断拦截
+2，如何判断
+3，登陆后如何继续原意图
+
+
+
+
+
 告诉框架几点：
 1, 你登录的activty
 
@@ -9,7 +17,9 @@
 
 
 
-
+```
+// A more classic application is to handle login events during a jump so that there is no need to repeat the login check on the target page.
+```
 
 参考：
 
