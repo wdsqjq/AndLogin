@@ -471,8 +471,8 @@ allprojects {
 
 
 dependencies {
-	implementation 'com.github.wdsqjq.AndLogin:lib:1.0.3'
-	kapt 'com.github.wdsqjq.AndLogin:apt_processor:1.0.3'
+	implementation 'com.github.wdsqjq.AndLogin:lib:1.0.0'
+	kapt 'com.github.wdsqjq.AndLogin:apt_processor:1.0.0'
 }
 ```
 

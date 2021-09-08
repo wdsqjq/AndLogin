@@ -20,8 +20,8 @@ class TargetActivity1 : AppCompatActivity() {
         findViewById<TextView>(R.id.tvAccount).text = "当前用户：" + SpUtil.getAccount()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if(item?.itemId == android.R.id.home){
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == android.R.id.home){
             finish()
         }
         return super.onOptionsItemSelected(item)
