@@ -1,10 +1,10 @@
-# AndLogin
+﻿# AndLogin
 
 **通过Hook AMS + APT实现集中式登录**
 
 效果如下：
 
-![preview](/img/preview.gif)
+![preview](img/preview.gif)
 
 
 
@@ -14,7 +14,7 @@
 2. 增加或删除目标页面时无需修改判断逻辑，只需增加或删除其对应注解即可，符合开闭原则，降低了耦合度
 3. 在用户登录成功后直接跳转到目标界面，保证了用户操作不被中断。
 
-![login](/img/hook_login.png)
+![login](img/hook_login.png)
 
 **使用：**
 
