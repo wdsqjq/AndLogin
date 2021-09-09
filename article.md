@@ -46,6 +46,8 @@ if (需要登录) {
 
 #### 1， 集中处理
 
+这里借鉴插件化的思路通过Hook AMS实现拦截并统一处理的目的
+
 ##### 1.1 分析Activity启动过程
 
 了解Activity启动过程的应该都知道Activity中的`startActivity()`最终会进入`Instrumentation`：
@@ -458,7 +460,7 @@ public class LoginInterceptorImpl implements IInterceptor {
         if (isLogin) { // 已经登录不拦截
             callback.onContinue(postcard);
         } else {  // 未登录则拦截
-            callback.onInterrupt(null);
+            // callback.onInterrupt(null);
         }
     }
 
@@ -468,7 +470,7 @@ public class LoginInterceptorImpl implements IInterceptor {
 }
 ```
 
-同样使用了APT，只需要添加`Interceptor`注解即可生效，不同的是ARouter是在启动Activity之前实现了拦截。
+实现`IInterceptor`接口并添加`Interceptor`注解即可在路由跳转时实现拦截。
 
 了解其原理的话可知：ARouter也只是在启动Activity前提供了拦截判断的时机，相当于本方案的第一步（Hook AMS）操作，后续实现解耦以及继续用户意图操作还需要自己实现。
 
