@@ -18,7 +18,7 @@ if (需要登录) {
 }
 ```
 
-这样就存在以下几方面问题：
+这中方式存在着以下几方面问题：
 
 1. 当项目功能逐渐庞大以后，存在大量重复的用于判断登录的代码，且判断逻辑可能分布在不同模块，维护成本很高。
 2. 增加或删除目标页面时需要修改判断逻辑，存在耦合。
@@ -218,7 +218,7 @@ if (intentName.equals("aaaActivity")
 
 #### 2， APT实现解耦
 
-APT就不多说了吧，就是注解处理器，很多流行框架都在用它。
+APT就不多说了，就是注解处理器，很多流行框架都在用它，如果你不了解请自行了解。
 
 首先定义注解，然后给目标Activity加上注解就相当于打了个标记，接着通过APT找到打了这些标记的Activity，将其全类名保存起来，最后在需要使用的地方通过反射调用即可。
 
@@ -445,7 +445,36 @@ class LoginActivity : AppCompatActivity() {
 
 ![preview](/img/preview.gif)
 
-#### 4， 总结
+#### 4， ARouter方案
+
+熟悉ARouter的都知道，它有一个拦截器的东西，可以在跳转前做拦截操作。如下：
+
+```java
+@Interceptor(name = "login", priority = 1)
+public class LoginInterceptorImpl implements IInterceptor {
+    @Override
+    public void process(Postcard postcard, InterceptorCallback callback) {
+		...
+        if (isLogin) { // 已经登录不拦截
+            callback.onContinue(postcard);
+        } else {  // 未登录则拦截
+            callback.onInterrupt(null);
+        }
+    }
+
+    @Override
+    public void init(Context context) {
+    }
+}
+```
+
+同样使用了APT，只需要添加`Interceptor`注解即可生效，不同的是ARouter是在启动Activity之前实现了拦截。
+
+了解其原理的话可知：ARouter也只是在启动Activity前提供了拦截判断的时机，相当于本方案的第一步（Hook AMS）操作，后续实现解耦以及继续用户意图操作还需要自己实现。
+
+
+
+#### 5， 总结
 
 本文提出了一种**通过Hook AMS + APT实现集中式登录的方案**，对比传统方式本方案存在以下优势：
 
@@ -454,9 +483,9 @@ class LoginActivity : AppCompatActivity() {
 2. 增加或删除目标页面时无需修改判断逻辑，只需增加或删除其对应注解即可，符合开闭原则，降低了耦合度
 3. 在用户登录成功后直接跳转到目标界面，保证了用户操作不被中断。
 
-本方案并没有太高深的东西，只是把常用的东西整合在一起，综合运用了一下。另外方案只是针对需要跳转页面的情况，对于判断是否登录后做其他操作的，比如弹出一个Toast这样的操作，可以通过AspectJ等来实现。
+**本方案并没有太高深的东西，只是把常用的东西整合在一起，综合运用了一下**。另外方案只是针对需要跳转页面的情况，对于判断是否登录后做其他操作的，比如弹出一个Toast这样的操作，可以通过AspectJ等来实现。
 
-项目地址：
+项目地址：https://github.com/wdsqjq/AndLogin
 
 最后，本方案提供了远程依赖，使用startup实现了无侵入初始化，使用方式如下：
 
